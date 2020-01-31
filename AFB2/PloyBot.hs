@@ -9,3 +9,7 @@ getMove :: String -> String
 listMoves :: String -> String
 
 --- YOUR IMPLEMENTATION STARTS HERE ---
+
+getMove x = x
+
+listMoves x = "listing moves"
