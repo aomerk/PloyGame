@@ -48,94 +48,79 @@ directionToDistanceDictionary = [-9, -8, 1, 10 ,9 ,8 , -1, -10]
 boardToRows :: String -> [Row]
 boardToRows boardStr = let rows = splitOn "/" boardStr in let indexedRows = zip [0..] rows in
  [Row  {rowIndex = i, columns = row}| (i,row) <- indexedRows]
---
--- -- TODO 9 elements from Row
+
+-- TODO 9 elements from Row
 rowToElements :: Row -> [Column]
 rowToElements row = let cols = columns(row) in let everyElement = splitOn "," cols in let indexedColumns = zip [0..] everyElement in [ Column {colIndex = colI, element =  elem, columnRowIndex = rowIndex(row) } | (colI, elem) <- indexedColumns ]
 --
 enumerate = zip [0..]
 
-
-
-
--- -- TODO turn board into list of strings for elements
+-- TODO turn board into list of strings for elements
 boardToElements :: String -> [Column]
-
 boardToElements board = let rows = boardToRows board in let elems = concat([ rowToElements row  | row <- rows ]) in elems
-
-
-boardToFigureList :: [Column] -> [Figure]
-boardToFigureList cols = let figures = [elemToFigure elem | elem <-cols] in [fig {aimIndices = filterAimsSame figures fig  }  | fig <- figures ]
-
-finalFilter figures = [f | f <- figures, let aims = aimIndices(f), let   ]
---
-
-figuresToField figures = [isWhite(elem) | elem <- figures]
---
-
-
--- -- TODO turn element string into a Figure Data
-elemToFigure :: Column -> Figure
-elemToFigure col =
-  let elem = element(col) :: String in
-  let (rest,owner, nullcheck) = figureOwner (elem) in
-  let idx = (colIndex(col) + (columnRowIndex(col) * 9))  in
-  let figureNum = readFigureNum rest in
-  let mDistance = figureMaxDistance figureNum in
-  let f = Figure {
-  isWhite = owner, position = idx, aimIndices = [], directions = setDirections figureNum 0 [],
-  maxDistance = mDistance , isNull = nullcheck   } in
-  f {aimIndices = (setAimIndices f mDistance  [])  }
-
-
 
 figureOwner :: String -> (String, Bool, Bool)
 figureOwner "" =  ("", False, True)
 figureOwner str = let owner = ((str !! 0) == 'w') in let rest = drop 1 str in (rest,owner, False)
 
-
 readFigureNum ::  String -> Int
 readFigureNum "" = 0
 readFigureNum rest =(if(rest == "" || rest == "," || rest == "/") then 0 else read rest :: Int)
 
-
 figureMaxDistance :: Int -> Int
 figureMaxDistance a =if(popCount a >= 4) then 1 else popCount a
 
--- setDirections num 0 [] = setDirections (num, , [])
 
--- input ===> 84 part of w84, empty array
--- returns ====> array of possible directions
 setDirections :: Int-> Int -> [Int] -> [Int]
-
 setDirections num 8 directions = directions
 setDirections num n directions = if testBit num n
   then setDirections num (n+1) (directions ++ [n])
   else setDirections num (n+1) directions
 
 
--- position , maxDistance
-setAimIndices :: Figure -> Int -> [Int] -> [Int]
-  -- setAimIndices position maxDistance directions = 3
-setAimIndices figure 0 aimIns = aimIns
+-- -- TODO turn element string into a Figure Data
+elemToFigure :: Column -> Figure -- create figures, but not their possible moves
+elemToFigure col =
+  let elem = element(col) :: String in
+  let (rest,owner, nullcheck) = figureOwner (elem) in --
+  let idx = (colIndex(col) + (columnRowIndex(col) * 9))  in  -- Figure position
+  let figureNum = readFigureNum rest in -- e.g 84 part of w84 element
+  let mDistance = figureMaxDistance figureNum in -- how far can it go? also tells which type of figure is it (Shield,Commander etc.)
+  let dirs = setDirections figureNum 0 [] in
+  Figure { -- create figure
+  isWhite = owner, position = idx, aimIndices = [], directions = dirs,
+  maxDistance = mDistance , isNull = nullcheck }
 
-setAimIndices fig dist aimIns =
-  let positionInd = position(fig) in
-  let ins = [positionInd + (dist * a) |a <- directionToDistance (directions( fig))] in
-  let insideBoard = [x | x <- ins , x >= 0 , x <=80 ] in
-  let (col, row) = (positionInd `mod` 9, positionInd `div` 9 ) in
-  let aims = [aim |aim <- insideBoard, let aimCol = aim `mod` 9 , let aimRow = (aim `div` 9) :: Int,  abs (aimCol - col ) >= 0 , abs (aimRow - row) >= 0  ] in
-  setAimIndices fig (dist - 1) (aimIns ++ aims)
+
+
+boardToFigureList :: [Column] -> [Figure]
+boardToFigureList cols = [elemToFigure elem | elem <-cols]  -- figures set with positions and possible(!) moves
+
+
+
+setAllFigureTargets :: [Figure] -> [Figure]
+setAllFigureTargets figures = [ figure{aimIndices = setFigureTargets figures figure dist [] }  | figure <- figures, let dist = maxDistance(figure) ]
+
+
+-- position , maxDistance
+setFigureTargets :: [Figure] -> Figure -> Int -> [Int] -> [Int]
+  -- setAimIndices position maxDistance directions = 3
+setFigureTargets figures figure 0 aimIns = aimIns -- REKURSIONSANKER
+
+
+setFigureTargets figures fig dist aimIns =
+  let positionInd = position(fig) in -- figure position
+  let dirs = directions(fig) in
+  let removedOutOfBorderDirections = [dir | dir <- dirs, let targetIdx = positionInd + (dist * directionToDistanceDictionary!!dir), targetIdx >= 0 , targetIdx <= 80] in
+  let removedSameColorDirections = [dir | dir <- removedOutOfBorderDirections, let targetIdx = positionInd + (dist * directionToDistanceDictionary!!dir), isNull(figures!!targetIdx) ] in
+  let ways = directionToDistance (removedSameColorDirections) in -- which ways can it go? -10, -9 , +1 index etc..
+  let allPossibleIndices = [ (targetIdx) |a <- ways, let targetIdx = positionInd + (dist * a) ] in -- how many tiles in that way => all possible indices
+  let legalMoves = filterAims allPossibleIndices positionInd in -- legal in means of board rules
+  setFigureTargets figures fig (dist - 1) (aimIns ++ legalMoves) -- add to possible aims and recurse
 
 
 directionToDistance dirs = [directionToDistanceDictionary!!x | x <- dirs]
-
-
-
--- remove aim indices that aims the same color
-filterAimsSame :: [Figure] -> Figure -> [Int]
-filterAimsSame figures f = let aims = aimIndices(f) in
-  [aim | aim <- aims, let aimingFigure = figures!!aim, isNull(aimingFigure) || isWhite(aimingFigure) /= isWhite(f)]
+indexToString index =   let (col, row) = (index `mod` 9, index `div` 9 ) in [rowToLetterDictionary!!row] ++ show (9-col)
 
 
 filterAims :: [Int] -> Int -> [Int]
@@ -144,11 +129,6 @@ filterAims aims current  =
   [aim |  aim<- aims , aim >= 0, aim<=80,
   let aimCol = aim `mod` 9 , let aimRow = (aim `div` 9) :: Int,
   abs (aimCol - col ) >= 0 , abs (aimRow - row) >= 0     ]
-
-
-indexToString index =   let (col, row) = (index `mod` 9, index `div` 9 ) in [rowToLetterDictionary!!row] ++ show (9-col)
-
-
 
 
 
@@ -166,26 +146,27 @@ createMoves figure = if length (directions(figure)) == 1 then createShieldMoves 
 
 aimsToMoves figures =  [createMoves figure | figure <- figures]
 
-getMove str = generateMoveList str !! 0
-
+-- getMove str = generateMoveList str !! 0
+getMove str = str
 
 charToString :: Char -> String
 charToString c = [c]
 
-generateMoveList :: String -> [String]
-generateMoveList board =
+generateMoveList :: String -> Bool -> [String]
+generateMoveList board whitePlays =
   let elements = boardToElements board in
-  let figures = boardToFigureList elements in
-  concat [createMoves figure | figure <- figures]
+  let parsedFigures = boardToFigureList elements in
+  let a = [figure |  figure <- parsedFigures, isNull(figure) == False] in
+  let allfig = setAllFigureTargets a in
+  let legalFigures = [figure |figure <- allfig, let whiteFigure = isWhite(figure), whiteFigure == whitePlays] in
+  concat [createMoves figure | figure <- legalFigures]
 
 -- listMoves :: String -> String
 -- listMoves input = let arr = generateMoveList input in concat (intersperse ","  arr)
 listMoves input =
-  let parseBoard = splitOn "," input in -- split in array
-  let isWhite = (last parseBoard) == " w" in --split get last element of array
-  let brd = init parseBoard in -- all except last item, as char array
-  let str =  concat (intersperse "," brd) in  -- turn it into string, board is now str
-  let arr = generateMoveList str  in
+  let parseInput = splitOn " " input in
+  let isWhite = (last parseInput) == "w" in --split get last element of array
+  let arr = generateMoveList (head parseInput) isWhite  in
   arr
   -- concat (intersperse "," arr)
 
@@ -196,8 +177,10 @@ main :: IO ()
 main = do
   args <- getArgs
   let oneString = foldr (\x y -> if y == "" then x else x ++ " " ++ y) "" args
-  -- print((boardToElements (oneString) ) )
+  -- print(((boardToElements (oneString))))
+  -- print(generateMoveList oneString True)
   -- print(setDirections 84 0 [])
+  print( head $splitOn " " oneString)
   print (listMoves oneString)
 
   -- putStrLn ( getMove oneString )
