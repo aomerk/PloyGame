@@ -18,7 +18,6 @@ import Data.List
 
 --- external signatures (NICHT AENDERN!)
 getMove :: String -> String
-listMoves :: String -> String
 
 
 --- YOUR IMPLEMENTATION STARTS HERE ---
@@ -170,11 +169,25 @@ aimsToMoves figures =  [createMoves figure | figure <- figures]
 getMove str = generateMoveList str !! 0
 
 
+charToString :: Char -> String
+charToString c = [c]
+
 generateMoveList :: String -> [String]
+generateMoveList board =
+  let elements = boardToElements board in
+  let figures = boardToFigureList elements in
+  concat [createMoves figure | figure <- figures]
 
-generateMoveList board = concat [ createMoves figure | figure <- boardToFigureList (boardToElements (board))]
-
-listMoves board = concat (intersperse "," (generateMoveList (board)) )
+-- listMoves :: String -> String
+-- listMoves input = let arr = generateMoveList input in concat (intersperse ","  arr)
+listMoves input =
+  let parseBoard = splitOn "," input in -- split in array
+  let isWhite = (last parseBoard) == " w" in --split get last element of array
+  let brd = init parseBoard in -- all except last item, as char array
+  let str =  concat (intersperse "," brd) in  -- turn it into string, board is now str
+  let arr = generateMoveList str  in
+  arr
+  -- concat (intersperse "," arr)
 
 -- Wer hier mehr erfahren will: Im naechsten Schritt (nicht Teil des Stoffs) kann in Haskell
 -- mit Monaden impliziter ein Zustand definiert und in sequentieller Ausfuehrung mitgefuehrt werden
@@ -185,6 +198,6 @@ main = do
   let oneString = foldr (\x y -> if y == "" then x else x ++ " " ++ y) "" args
   -- print((boardToElements (oneString) ) )
   -- print(setDirections 84 0 [])
-  print (generateMoveList oneString !! 0)
+  print (listMoves oneString)
 
-  putStrLn ( getMove oneString )
+  -- putStrLn ( getMove oneString )
