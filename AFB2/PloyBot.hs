@@ -11,6 +11,7 @@ import Data.Bits
 import Data.List
 
 
+
 --- external signatures (NICHT AENDERN!)
 getMove :: String -> String
 
@@ -95,25 +96,27 @@ boardToFigureList cols = [elemToFigure elem | elem <-cols]  -- figures set with 
 
 setAllFigureTargets :: [Figure] -> [Figure]
 -- setAllFigureTargets figures = [figure{aimIndices =  } | figure <- figures, let dist = maxDistance(figure)]
-setAllFigureTargets figures = [ figure{aimIndices = setFigureTargets figures figure dist [] }  | figure <- figures, let dist = maxDistance(figure) ]
+setAllFigureTargets figures = [ figure{aimIndices = setFigureTargets dirs figures figure 0 [] }  | figure <- figures, let dist = maxDistance(figure), let dirs = directions(figure) ]
 
 
 -- position , maxDistance
 -- setFigureTargets :: [Figure] -> Figure -> Int -> [Int] -> [Int]
   -- setAimIndices position maxDistance directions = 3
-setFigureTargets figures figure 0 aimIns = aimIns -- REKURSIONSANKER
+setFigureTargets dirs figures figure 99 aimIns = aimIns -- REKURSIONSANKER
 
 
-setFigureTargets figures fig dist aimIns =
-  if isNull(fig) then setFigureTargets figures fig 0 [] else
+setFigureTargets dirs figures fig dist aimIns =
+  let maxDist = maxDistance(fig) in
+
+  if dist == maxDist then setFigureTargets dirs figures fig 99 aimIns else
+  if isNull(fig) then setFigureTargets dirs figures fig 99 [] else
   let positionInd = position(fig) in -- figure position
-  let dirs = directions(fig) in
   let removedOutOfBorderDirections = [dir | dir <- dirs, let targetIdx = positionInd + (dist * directionToDistanceDictionary!!dir), targetIdx >= 0 && targetIdx <= 80] in
   let removedSameColorDirections = [dir | dir <- removedOutOfBorderDirections, let targetIdx = positionInd + (dist * directionToDistanceDictionary!!dir),  (isNull(figures!!targetIdx)) ] in
-  let ways = directionToDistance (removedSameColorDirections) in -- which ways can it go? -10, -9 , +1 index etc..
-  let allPossibleIndices = [ (targetIdx) |a <- ways, let targetIdx = positionInd + (dist * a) ] in -- how many tiles in that way => all possible indices
+  -- let ways = directionToDistance (removedSameColorDirections) in -- which ways can it go? -10, -9 , +1 index etc..
+  let allPossibleIndices = [ (targetIdx) |dir <- removedSameColorDirections, let targetIdx = positionInd + (dist * directionToDistanceDictionary!!dir)] in -- how many tiles in that way => all possible indices
   let legalMoves = filterAims allPossibleIndices positionInd in -- legal in means of board rules
-  setFigureTargets figures fig (dist - 1) (aimIns ++ legalMoves) -- add to possible aims and recurse
+  setFigureTargets removedSameColorDirections figures fig (dist + 1) (aimIns ++ legalMoves) -- add to possible aims and recurse
 
 
 directionToDistance dirs = [directionToDistanceDictionary!!x | x <- dirs]
@@ -128,6 +131,16 @@ filterAims aims current  =
   abs (aimCol - col ) >= 0 , abs (aimRow - row) >= 0     ]
 
 
+filterAim :: Int -> Int -> Bool
+filterAim aim current  =
+  let (col, row) = (current `mod` 9, current `div` 9 ) in
+  let aimCol = aim `mod` 9 in
+  let aimRow = (aim `div` 9) in
+  aim >= 0 && aim<=80  && abs (aimCol - col ) >= 0 && abs (aimRow - row) >= 0
+
+
+
+
 
 createOtherMoves :: Figure -> [String]
 -- createOtherMoves figure = let aims = aimIndices(figure) in let from = indexToString (position(figure)) in let moves = [from ++ "-" ++ aimstr ++ "-" ++ "0" | aimIdx <- aims, let aimstr = indexToString aimIdx] in let withRotations = [move ++ show (i) | move <- moves, i <- [0..7]] in withRotations
@@ -136,14 +149,14 @@ createOtherMoves figure =
   let from = indexToString (position(figure)) in
   let aims = aimIndices(figure) in
   let moves = [from ++ "-" ++ aimstr ++ "-" ++ "0" | aimIdx <- aims, let aimstr = indexToString aimIdx ] in
-  moves ++ [from ++ "-" ++ from ++ "-" ++ show (i)  | i <- [0..7]]
+  moves ++ [from ++ "-" ++ from ++ "-" ++ show (i)  | i <- [1..7]]
 
 createShieldMoves figure =
   let from = indexToString (position(figure)) in
   let aims = aimIndices(figure) ++ [position(figure)] in
 
   let moves = [from ++ "-" ++ aimstr ++ "-" | aimIdx <- aims, let aimstr = indexToString aimIdx] in
-  let withRotations = [move ++ show (i) | move <- moves, i <- [0..7]] in withRotations
+  let withRotations = [move ++ show (i) | move <- moves, i <- [0..7]] in withRotations ++ [from ++ "-" ++ from ++ "-" ++ show(i) | i <- [1..7]]
 
 createMoves :: Figure -> [String]
 createMoves figure  = if isNull(figure)
@@ -154,8 +167,6 @@ createMoves figure  = if isNull(figure)
 
 aimsToMoves figures =  [createMoves figure | figure <- figures]
 
--- getMove str = generateMoveList str !! 0
-getMove str = str
 
 charToString :: Char -> String
 charToString c = [c]
@@ -176,6 +187,10 @@ parseInput input =
   let elements = boardToElements (head parsedInput) in
   let parsedFigures = boardToFigureList elements in
   (parsedFigures, isWhite)
+
+
+getMove str = generateMoveList str !! 0
+
 
 listMoves :: String -> String
 -- listMoves input = let arr = generateMoveList input in concat (intersperse ","  arr)

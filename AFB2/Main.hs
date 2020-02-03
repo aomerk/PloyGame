@@ -22,6 +22,5 @@ main = do
   -- print(generateMoveList oneString)
   -- print(setDirections 84 0 [])
   -- print( head $splitOn " " oneString)
-  print (listMoves oneString)
-
-  -- putStrLn ( getMove oneString )
+  -- print (listMoves oneString)
+  putStrLn ( getMove oneString )
