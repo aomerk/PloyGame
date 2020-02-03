@@ -99,20 +99,22 @@ boardToFigureList cols = [elemToFigure elem | elem <-cols]  -- figures set with 
 
 
 setAllFigureTargets :: [Figure] -> [Figure]
+-- setAllFigureTargets figures = [figure{aimIndices =  } | figure <- figures, let dist = maxDistance(figure)]
 setAllFigureTargets figures = [ figure{aimIndices = setFigureTargets figures figure dist [] }  | figure <- figures, let dist = maxDistance(figure) ]
 
 
 -- position , maxDistance
-setFigureTargets :: [Figure] -> Figure -> Int -> [Int] -> [Int]
+-- setFigureTargets :: [Figure] -> Figure -> Int -> [Int] -> [Int]
   -- setAimIndices position maxDistance directions = 3
 setFigureTargets figures figure 0 aimIns = aimIns -- REKURSIONSANKER
 
 
 setFigureTargets figures fig dist aimIns =
+  if isNull(fig) then setFigureTargets figures fig 0 [] else
   let positionInd = position(fig) in -- figure position
   let dirs = directions(fig) in
-  let removedOutOfBorderDirections = [dir | dir <- dirs, let targetIdx = positionInd + (dist * directionToDistanceDictionary!!dir), targetIdx >= 0 , targetIdx <= 80] in
-  let removedSameColorDirections = [dir | dir <- removedOutOfBorderDirections, let targetIdx = positionInd + (dist * directionToDistanceDictionary!!dir), isNull(figures!!targetIdx) ] in
+  let removedOutOfBorderDirections = [dir | dir <- dirs, let targetIdx = positionInd + (dist * directionToDistanceDictionary!!dir), targetIdx >= 0 && targetIdx <= 80] in
+  let removedSameColorDirections = [dir | dir <- removedOutOfBorderDirections, let targetIdx = positionInd + (dist * directionToDistanceDictionary!!dir),  (isNull(figures!!targetIdx)) ] in
   let ways = directionToDistance (removedSameColorDirections) in -- which ways can it go? -10, -9 , +1 index etc..
   let allPossibleIndices = [ (targetIdx) |a <- ways, let targetIdx = positionInd + (dist * a) ] in -- how many tiles in that way => all possible indices
   let legalMoves = filterAims allPossibleIndices positionInd in -- legal in means of board rules
@@ -120,29 +122,40 @@ setFigureTargets figures fig dist aimIns =
 
 
 directionToDistance dirs = [directionToDistanceDictionary!!x | x <- dirs]
-indexToString index =   let (col, row) = (index `mod` 9, index `div` 9 ) in [rowToLetterDictionary!!row] ++ show (9-col)
+indexToString index =   let (col, row) = (index `mod` 9, index `div` 9 ) in [rowToLetterDictionary!!col] ++ show (9-row)
 
 
 filterAims :: [Int] -> Int -> [Int]
 filterAims aims current  =
   let (col, row) = (current `mod` 9, current `div` 9 ) in
-  [aim |  aim<- aims , aim >= 0, aim<=80,
+  [aim |  aim<- aims , aim >= 0 && aim<=80,
   let aimCol = aim `mod` 9 , let aimRow = (aim `div` 9) :: Int,
   abs (aimCol - col ) >= 0 , abs (aimRow - row) >= 0     ]
 
 
 
 createOtherMoves :: Figure -> [String]
-createOtherMoves figure = let aims = aimIndices(figure) in let from = indexToString (position(figure)) in let moves = [from ++ "-" ++ aimstr ++ "-" ++ "0" | aimIdx <- aims, let aimstr = indexToString aimIdx] in let withRotations = [move ++ show (i) | move <- moves, i <- [0..7]] in withRotations
+-- createOtherMoves figure = let aims = aimIndices(figure) in let from = indexToString (position(figure)) in let moves = [from ++ "-" ++ aimstr ++ "-" ++ "0" | aimIdx <- aims, let aimstr = indexToString aimIdx] in let withRotations = [move ++ show (i) | move <- moves, i <- [0..7]] in withRotations
 
--- createOtherMoves figure = let from = indexToString position(figure)
--- in let moves = [from ++ "-" ++ aimstr ++ "-" ++ "0" | aimIdx <- aimIndices(figure), let aimstr = indexToString aimIdx ]
--- in  [from ++ "-" ++ from ++ "-" ++ show (i)  | i <- [0..7]]
+createOtherMoves figure =
+  let from = indexToString (position(figure)) in
+  let aims = aimIndices(figure) in
+  let moves = [from ++ "-" ++ aimstr ++ "-" ++ "0" | aimIdx <- aims, let aimstr = indexToString aimIdx ] in
+  moves ++ [from ++ "-" ++ from ++ "-" ++ show (i)  | i <- [0..7]]
 
-createShieldMoves figure = let aims = aimIndices(figure) in let from = indexToString (position(figure)) in let moves = [from ++ "-" ++ aimstr ++ "-" ++ "0" | aimIdx <- aims, let aimstr = indexToString aimIdx] in let withRotations = [move ++ show (i) | move <- moves, i <- [0..7]] in withRotations
+createShieldMoves figure =
+  let from = indexToString (position(figure)) in
+  let aims = aimIndices(figure) ++ [position(figure)] in
+
+  let moves = [from ++ "-" ++ aimstr ++ "-" | aimIdx <- aims, let aimstr = indexToString aimIdx] in
+  let withRotations = [move ++ show (i) | move <- moves, i <- [0..7]] in withRotations
 
 createMoves :: Figure -> [String]
-createMoves figure = if length (directions(figure)) == 1 then createShieldMoves figure else createOtherMoves figure
+createMoves figure  = if isNull(figure)
+  then []
+  else
+    if length (directions(figure)) == 1 then createShieldMoves figure else createOtherMoves figure
+
 
 aimsToMoves figures =  [createMoves figure | figure <- figures]
 
@@ -152,23 +165,29 @@ getMove str = str
 charToString :: Char -> String
 charToString c = [c]
 
-generateMoveList :: String -> Bool -> [String]
-generateMoveList board whitePlays =
-  let elements = boardToElements board in
-  let parsedFigures = boardToFigureList elements in
-  let a = [figure |  figure <- parsedFigures, isNull(figure) == False] in
-  let allfig = setAllFigureTargets a in
-  let legalFigures = [figure |figure <- allfig, let whiteFigure = isWhite(figure), whiteFigure == whitePlays] in
-  concat [createMoves figure | figure <- legalFigures]
+generateMoveList :: String -> [String]
+generateMoveList input =
+  let (parsedFigures, whitePlays) = parseInput input in
+  -- let a = [figure |  figure <- parsedFigures, isNull(figure) == False] in
+  let allfig = setAllFigureTargets parsedFigures in
+  -- let legalFigures = [figure |figure <- allfig, let whiteFigure = isWhite(figure), whiteFigure == whitePlays] in
+  concat [createMoves figure | figure <- allfig, isWhite(figure) == whitePlays]
 
--- listMoves :: String -> String
+
+parseInput :: String -> ([Figure], Bool)
+parseInput input =
+  let parsedInput = splitOn " " input in
+  let isWhite = (last parsedInput) == "w" in --split get last element of array
+  let elements = boardToElements (head parsedInput) in
+  let parsedFigures = boardToFigureList elements in
+  (parsedFigures, isWhite)
+
+listMoves :: String -> String
 -- listMoves input = let arr = generateMoveList input in concat (intersperse ","  arr)
 listMoves input =
-  let parseInput = splitOn " " input in
-  let isWhite = (last parseInput) == "w" in --split get last element of array
-  let arr = generateMoveList (head parseInput) isWhite  in
-  arr
-  -- concat (intersperse "," arr)
+  -- let (figures, isWhite) = parseInput input in
+  let arr = generateMoveList (input)  in
+  concat (intersperse "," arr)
 
 -- Wer hier mehr erfahren will: Im naechsten Schritt (nicht Teil des Stoffs) kann in Haskell
 -- mit Monaden impliziter ein Zustand definiert und in sequentieller Ausfuehrung mitgefuehrt werden
@@ -177,10 +196,11 @@ main :: IO ()
 main = do
   args <- getArgs
   let oneString = foldr (\x y -> if y == "" then x else x ++ " " ++ y) "" args
-  -- print(((boardToElements (oneString))))
-  -- print(generateMoveList oneString True)
+  -- print(parseInput (oneString))
+  -- print(((boardToElements oneString)))
+  -- print(generateMoveList oneString)
   -- print(setDirections 84 0 [])
-  print( head $splitOn " " oneString)
+  -- print( head $splitOn " " oneString)
   print (listMoves oneString)
 
   -- putStrLn ( getMove oneString )
