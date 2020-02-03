@@ -13,6 +13,7 @@ import Util
 import Data.Foldable
 import Data.Array
 import Data.Bits
+import Data.List
 
 
 --- external signatures (NICHT AENDERN!)
@@ -40,9 +41,10 @@ stringToArray s = listArray (0, length s - 1) s
 
 figureList = []
 
+rowToLetterDictionary = ['a','b','c','d','e','f','g','h','i']
 
+directionToDistanceDictionary = [-9, -8, 1, 10 ,9 ,8 , -1, -10]
 
---
 -- -- TODO 9 rows from board string
 boardToRows :: String -> [Row]
 boardToRows boardStr = let rows = splitOn "/" boardStr in let indexedRows = zip [0..] rows in
@@ -62,6 +64,8 @@ boardToElements :: String -> [Column]
 
 boardToElements board = let rows = boardToRows board in let elems = concat([ rowToElements row  | row <- rows ]) in elems
 
+
+boardToFigureList :: [Column] -> [Figure]
 boardToFigureList cols = let figures = [elemToFigure elem | elem <-cols] in [fig {aimIndices = filterAimsSame figures fig  }  | fig <- figures ]
 
 finalFilter figures = [f | f <- figures, let aims = aimIndices(f), let   ]
@@ -70,7 +74,6 @@ finalFilter figures = [f | f <- figures, let aims = aimIndices(f), let   ]
 figuresToField figures = [isWhite(elem) | elem <- figures]
 --
 
-directionToDistanceDictionary = [-9, -8, 1, 10 ,9 ,8 , -1, -10]
 
 -- -- TODO turn element string into a Figure Data
 elemToFigure :: Column -> Figure
@@ -130,29 +133,48 @@ directionToDistance dirs = [directionToDistanceDictionary!!x | x <- dirs]
 
 
 
+-- remove aim indices that aims the same color
 filterAimsSame :: [Figure] -> Figure -> [Int]
 filterAimsSame figures f = let aims = aimIndices(f) in
   [aim | aim <- aims, let aimingFigure = figures!!aim, isNull(aimingFigure) || isWhite(aimingFigure) /= isWhite(f)]
 
 
+filterAims :: [Int] -> Int -> [Int]
 filterAims aims current  =
   let (col, row) = (current `mod` 9, current `div` 9 ) in
   [aim |  aim<- aims , aim >= 0, aim<=80,
   let aimCol = aim `mod` 9 , let aimRow = (aim `div` 9) :: Int,
   abs (aimCol - col ) >= 0 , abs (aimRow - row) >= 0     ]
---
--- -- TODO board string to figures list
--- boardToFigureList :: String -> [String]
--- boardToFigureList board = let elementsArray = boardToElements board in [elemToFigure show elem | elem <- elementsArray]
---
---
---
---
--- -- boardToFigureList positionList = splitOn "," positionList
 
-getMove str = "getMove"
 
-listMoves lst = lst
+indexToString index =   let (col, row) = (index `mod` 9, index `div` 9 ) in [rowToLetterDictionary!!row] ++ show (9-col)
+
+
+
+
+
+createOtherMoves :: Figure -> [String]
+createOtherMoves figure = let aims = aimIndices(figure) in let from = indexToString (position(figure)) in let moves = [from ++ "-" ++ aimstr ++ "-" ++ "0" | aimIdx <- aims, let aimstr = indexToString aimIdx] in let withRotations = [move ++ show (i) | move <- moves, i <- [0..7]] in withRotations
+
+-- createOtherMoves figure = let from = indexToString position(figure)
+-- in let moves = [from ++ "-" ++ aimstr ++ "-" ++ "0" | aimIdx <- aimIndices(figure), let aimstr = indexToString aimIdx ]
+-- in  [from ++ "-" ++ from ++ "-" ++ show (i)  | i <- [0..7]]
+
+createShieldMoves figure = let aims = aimIndices(figure) in let from = indexToString (position(figure)) in let moves = [from ++ "-" ++ aimstr ++ "-" ++ "0" | aimIdx <- aims, let aimstr = indexToString aimIdx] in let withRotations = [move ++ show (i) | move <- moves, i <- [0..7]] in withRotations
+
+createMoves :: Figure -> [String]
+createMoves figure = if length (directions(figure)) == 1 then createShieldMoves figure else createOtherMoves figure
+
+aimsToMoves figures =  [createMoves figure | figure <- figures]
+
+getMove str = generateMoveList str !! 0
+
+
+generateMoveList :: String -> [String]
+
+generateMoveList board = concat [ createMoves figure | figure <- boardToFigureList (boardToElements (board))]
+
+listMoves board = concat (intersperse "," (generateMoveList (board)) )
 
 -- Wer hier mehr erfahren will: Im naechsten Schritt (nicht Teil des Stoffs) kann in Haskell
 -- mit Monaden impliziter ein Zustand definiert und in sequentieller Ausfuehrung mitgefuehrt werden
@@ -163,6 +185,6 @@ main = do
   let oneString = foldr (\x y -> if y == "" then x else x ++ " " ++ y) "" args
   -- print((boardToElements (oneString) ) )
   -- print(setDirections 84 0 [])
-  print((boardToFigureList (boardToElements (oneString) ) ))
+  print (generateMoveList oneString !! 0)
 
   putStrLn ( getMove oneString )
