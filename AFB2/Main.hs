@@ -62,7 +62,9 @@ boardToElements :: String -> [Column]
 
 boardToElements board = let rows = boardToRows board in let elems = concat([ rowToElements row  | row <- rows ]) in elems
 
-boardToFigureList cols = [elemToFigure elem | elem <-cols]
+boardToFigureList cols = let figures = [elemToFigure elem | elem <-cols] in [fig {aimIndices = filterAimsSame figures fig  }  | fig <- figures ]
+
+finalFilter figures = [f | f <- figures, let aims = aimIndices(f), let   ]
 --
 
 figuresToField figures = [isWhite(elem) | elem <- figures]
@@ -77,9 +79,12 @@ elemToFigure col =
   let (rest,owner, nullcheck) = figureOwner (elem) in
   let idx = (colIndex(col) + (columnRowIndex(col) * 9))  in
   let figureNum = readFigureNum rest in
-  Figure {
+  let mDistance = figureMaxDistance figureNum in
+  let f = Figure {
   isWhite = owner, position = idx, aimIndices = [], directions = setDirections figureNum 0 [],
-  maxDistance = figureMaxDistance figureNum, isNull = nullcheck   }
+  maxDistance = mDistance , isNull = nullcheck   } in
+  f {aimIndices = (setAimIndices f mDistance  [])  }
+
 
 
 figureOwner :: String -> (String, Bool, Bool)
@@ -123,6 +128,13 @@ setAimIndices fig dist aimIns =
 
 directionToDistance dirs = [directionToDistanceDictionary!!x | x <- dirs]
 
+
+
+filterAimsSame :: [Figure] -> Figure -> [Int]
+filterAimsSame figures f = let aims = aimIndices(f) in
+  [aim | aim <- aims, let aimingFigure = figures!!aim, isNull(aimingFigure) || isWhite(aimingFigure) /= isWhite(f)]
+
+
 filterAims aims current  =
   let (col, row) = (current `mod` 9, current `div` 9 ) in
   [aim |  aim<- aims , aim >= 0, aim<=80,
@@ -151,6 +163,6 @@ main = do
   let oneString = foldr (\x y -> if y == "" then x else x ++ " " ++ y) "" args
   -- print((boardToElements (oneString) ) )
   -- print(setDirections 84 0 [])
-  print((boardToFigureList (boardToElements (oneString) ) ) )
+  print((boardToFigureList (boardToElements (oneString) ) ))
 
   putStrLn ( getMove oneString )
