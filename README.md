@@ -4,9 +4,9 @@
 [![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://travis-ci.org/joemccann/dillinger)
 
 * [GameFactory] - Bot kullanmaniz icin buradaki variable degismeli
-* [Model/Ploy] - awesome web-based text editor
+* [Model/Ploy] - Bizim kodlarimiz
+
 * [Issues] - Buradan yapilacak seyleri takip edebilirsiniz
-* 
 ### Installation
 
 Dillinger requires [Node.js](https://nodejs.org/) v4+ to run.
