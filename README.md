@@ -9,8 +9,6 @@
 * [Issues] - Buradan yapilacak seyleri takip edebilirsiniz
 ### Installation
 
-Dillinger requires [Node.js](https://nodejs.org/) v4+ to run.
-
 Bot nasil compile edilir ve calistirilir
 ```
 $ cd AFB1
@@ -21,6 +19,7 @@ $ rm Main ; ghc -o Main Main.hs; ./Main ,w84,w41,w56,w170,w56,w41,w84,/,,w24,w40
 ### Development
 
 Intellij hic denemeyin eclipsete calisiyor, intellij de JAVA EE Servlet calistiramiyorum ben
+Haskell icin atom kullandim guzel, vscode extensionlarinin hepsi beta hicbisi duzgun calismadi
 License
 ----
 
