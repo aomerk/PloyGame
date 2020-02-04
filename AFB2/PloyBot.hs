@@ -190,11 +190,12 @@ parseInput input =
 
 
 getMove str = generateMoveList str !! 0
+-- getMove str = "a9-a8-0"
 
-
-listMoves :: String -> String
+-- listMoves :: String -> String
 -- listMoves input = let arr = generateMoveList input in concat (intersperse ","  arr)
 listMoves input =
   -- let (figures, isWhite) = parseInput input in
   let arr = generateMoveList (input)  in
-  concat (intersperse "," arr)
+  let moves = concat (intersperse "," arr) in
+  ("[" ++ moves ++ "]")

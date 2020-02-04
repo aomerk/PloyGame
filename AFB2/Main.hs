@@ -9,7 +9,7 @@ import PloyBot
 import System.Environment
 import Data.Char
 import Util
-
+-- import PloyFormat
 -- Wer hier mehr erfahren will: Im naechsten Schritt (nicht Teil des Stoffs) kann in Haskell
 -- mit Monaden impliziter ein Zustand definiert und in sequentieller Ausfuehrung mitgefuehrt werden
 -- Dadurch wird auch Interaktion mit der Umgebung moeglich, wie im Beispiel der IO-Monade.
@@ -24,3 +24,4 @@ main = do
   -- print( head $splitOn " " oneString)
   -- print (listMoves oneString)
   putStrLn ( getMove oneString )
+  -- print("[b9-b9-1]")
