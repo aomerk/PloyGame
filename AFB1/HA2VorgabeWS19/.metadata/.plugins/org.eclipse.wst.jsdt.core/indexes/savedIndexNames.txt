@@ -1,0 +1,7 @@
+INDEX VERSION 1.4+/home/dfirexii/Informatik/Softwaretechnik_und_Programmierparadigmen/PloyGame/HA2VorgabeWS19/.metadata/.plugins/org.eclipse.wst.jsdt.core/indexes
+3451700360.index
+2095902899.index
+3372057973.index
+2925798297.index
+201175566.index
+2405254905.index
