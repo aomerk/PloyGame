@@ -1,13 +1,13 @@
-# Direct Links
+# PloyGame
 
-
+### Direct Links
 [![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://travis-ci.org/joemccann/dillinger)
 
 * [GameFactory] - Bot kullanmaniz icin buradaki variable degismeli
-* [Model/Ploy] - Bizim kodlarimiz
-
+* [Model/Ploy] - Bizim kodumuz
 * [Issues] - Buradan yapilacak seyleri takip edebilirsiniz
 ### Installation
+
 
 Bot nasil compile edilir ve calistirilir
 ```
@@ -20,11 +20,6 @@ $ rm Main ; ghc -o Main Main.hs; ./Main ,w84,w41,w56,w170,w56,w41,w84,/,,w24,w40
 
 Intellij hic denemeyin eclipsete calisiyor, intellij de JAVA EE Servlet calistiramiyorum ben
 Haskell icin atom kullandim guzel, vscode extensionlarinin hepsi beta hicbisi duzgun calismadi
-License
-----
-
-MIT
-
 
 
    [GameFactory]: <https://github.com/aomerk/PloyGame/edit/haskell-dev-branch/AFB1/HA2VorgabeWS19/HA2VorgabeWS19/src/de/tuberlin/sese/swtpp/gameserver/control/GameFactory.java>
