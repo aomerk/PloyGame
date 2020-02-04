@@ -18,13 +18,4 @@ main :: IO ()
 main = do
   args <- getArgs
   let oneString = foldr (\x y -> if y == "" then x else x ++ " " ++ y) "" args
-  -- print(parseInput (oneString))
-  -- print(boardToFigureList((boardToElements oneString)))
-  -- print(generateMoveList oneString)
-  -- print(setDirections 84 0 [])
-  -- print( head $splitOn " " oneString)
-  -- print(setAllFigureTargets(boardToFigureList((boardToElements oneString))))
-  -- print (listMoves oneString)
-  -- print(aLittleTrickFromMeButNotNeccessary oneString)
   putStrLn ( getMove oneString )
-  -- print("[b9-b9-1]")
