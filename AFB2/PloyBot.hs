@@ -96,7 +96,7 @@ boardToFigureList cols = [elemToFigure elem | elem <-cols]  -- figures set with 
 
 setAllFigureTargets :: [Figure] -> [Figure]
 -- setAllFigureTargets figures = [figure{aimIndices =  } | figure <- figures, let dist = maxDistance(figure)]
-setAllFigureTargets figures = [ figure{aimIndices = setFigureTargets dirs figures figure 0 [] }  | figure <- figures, let dist = maxDistance(figure), let dirs = directions(figure) ]
+setAllFigureTargets figures = [ figure{aimIndices = setFigureTargets dirs figures figure 1 [] }  | figure <- figures, let dist = maxDistance(figure), let dirs = directions(figure) ]
 
 
 -- position , maxDistance
@@ -108,14 +108,14 @@ setFigureTargets dirs figures figure 99 aimIns = aimIns -- REKURSIONSANKER
 setFigureTargets dirs figures fig dist aimIns =
   let maxDist = maxDistance(fig) in
 
-  if dist == maxDist then setFigureTargets dirs figures fig 99 aimIns else
+  if dist > maxDist then setFigureTargets dirs figures fig 99 aimIns else
   if isNull(fig) then setFigureTargets dirs figures fig 99 [] else
   let positionInd = position(fig) in -- figure position
   let removedOutOfBorderDirections = [dir | dir <- dirs, let targetIdx = positionInd + (dist * directionToDistanceDictionary!!dir), targetIdx >= 0 && targetIdx <= 80] in
   let removedSameColorDirections = [dir | dir <- removedOutOfBorderDirections, let targetIdx = positionInd + (dist * directionToDistanceDictionary!!dir),  (isNull(figures!!targetIdx)) ] in
   -- let ways = directionToDistance (removedSameColorDirections) in -- which ways can it go? -10, -9 , +1 index etc..
   let allPossibleIndices = [ (targetIdx) |dir <- removedSameColorDirections, let targetIdx = positionInd + (dist * directionToDistanceDictionary!!dir)] in -- how many tiles in that way => all possible indices
-  let legalMoves = filterAims allPossibleIndices positionInd in -- legal in means of board rules
+  let legalMoves = filterAims allPossibleIndices dist positionInd  in -- legal in means of board rules
   setFigureTargets removedSameColorDirections figures fig (dist + 1) (aimIns ++ legalMoves) -- add to possible aims and recurse
 
 
@@ -123,23 +123,12 @@ directionToDistance dirs = [directionToDistanceDictionary!!x | x <- dirs]
 indexToString index =   let (col, row) = (index `mod` 9, index `div` 9 ) in [rowToLetterDictionary!!col] ++ show (9-row)
 
 
-filterAims :: [Int] -> Int -> [Int]
-filterAims aims current  =
+filterAims :: [Int] -> Int ->Int -> [Int]
+filterAims aims dist current  =
   let (col, row) = (current `mod` 9, current `div` 9 ) in
   [aim |  aim<- aims , aim >= 0 && aim<=80,
   let aimCol = aim `mod` 9 , let aimRow = (aim `div` 9) :: Int,
-  abs (aimCol - col ) >= 0 , abs (aimRow - row) >= 0     ]
-
-
-filterAim :: Int -> Int -> Bool
-filterAim aim current  =
-  let (col, row) = (current `mod` 9, current `div` 9 ) in
-  let aimCol = aim `mod` 9 in
-  let aimRow = (aim `div` 9) in
-  aim >= 0 && aim<=80  && abs (aimCol - col ) >= 0 && abs (aimRow - row) >= 0
-
-
-
+  abs (aimCol - col ) <= dist && abs (aimRow - row) <= dist     ]
 
 
 createOtherMoves :: Figure -> [String]
@@ -154,7 +143,6 @@ createOtherMoves figure =
 createShieldMoves figure =
   let from = indexToString (position(figure)) in
   let aims = aimIndices(figure) ++ [position(figure)] in
-
   let moves = [from ++ "-" ++ aimstr ++ "-" | aimIdx <- aims, let aimstr = indexToString aimIdx] in
   let withRotations = [move ++ show (i) | move <- moves, i <- [0..7]] in withRotations ++ [from ++ "-" ++ from ++ "-" ++ show(i) | i <- [1..7]]
 
@@ -189,11 +177,9 @@ parseInput input =
   (parsedFigures, isWhite)
 
 
-getMove str = generateMoveList str !! 0
--- getMove str = "a9-a8-0"
+aLittleTrickFromMeButNotNeccessary oneString = let moves = generateMoveList oneString in let notARotation = [move | move <- moves, last move == '0' ] in if length notARotation == 0 then moves!!0 else notARotation!!0
 
--- listMoves :: String -> String
--- listMoves input = let arr = generateMoveList input in concat (intersperse ","  arr)
+getMove str = aLittleTrickFromMeButNotNeccessary str
 listMoves input =
   -- let (figures, isWhite) = parseInput input in
   let arr = generateMoveList (input)  in
