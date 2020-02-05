@@ -70,6 +70,27 @@ public class TryMoveTest {
      *******************************************/
 
     @Test
+    public void eatOpponentTest() {
+        startGame(
+                ",w84,w41,w56,w170,w56,w41,w84,/,,w24,w40,w17,w40,w48,,/,,,w16,w16,,,,/,,,,,,,,/,,,,,,,,/,,,,w16,,,,/,,,b1,b1,b1,,,/,,b3,b130,b17,b130,b129,,/,b69,b146,b131,b170,b131,b146,b69,",
+                false);
+        assertMove("e3-e4-0", false, true);
+        assertGameState(
+                ",w84,w41,w56,w170,w56,w41,w84,/,,w24,w40,w17,w40,w48,,/,,,w16,w16,,,,/,,,,,,,,/,,,,,,,,/,,,,b1,,,,/,,,b1,,b1,,,/,,b3,b130,b17,b130,b129,,/,b69,b146,b131,b170,b131,b146,b69,",
+                true, false, false);
+    }
+    @Test
+    public void tryToEatYourFigureTest() {
+        startGame(
+                ",w84,w41,w56,w170,w56,w41,w84,/,,w24,w40,w17,w40,w48,,/,,,w16,w16,,,,/,,,,,,,,/,,,,,,,,/,,,,w16,,,,/,,,b1,b1,b1,,,/,,b3,b130,b17,b130,b129,,/,b69,b146,b131,b170,b131,b146,b69,",
+                false);
+        assertMove("d2-d3-0", false, false);
+        assertGameState(
+                ",w84,w41,w56,w170,w56,w41,w84,/,,w24,w40,w17,w40,w48,,/,,,w16,w16,,,,/,,,,,,,,/,,,,,,,,/,,,,w16,,,,/,,,b1,b1,b1,,,/,,b3,b130,b17,b130,b129,,/,b69,b146,b131,b170,b131,b146,b69,",
+                false, false, false);
+    }
+
+    @Test
     public void moveTest() {
         startGame(
                 ",w84,w41,w56,w170,w56,w41,w84,/,,w24,w40,w17,w40,w48,,/,,,w16,w16,w16,,,/,,,,,,,,/,,,,,,,,/,,,,,,,,/,,,b1,b1,b1,,,/,,b3,b130,b17,b130,b129,,/,b69,b146,b131,b170,b131,b146,b69,",
