@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><testrun name="TryMoveTest" project="HA2VorgabeWS19" tests="4" started="4" failures="0" errors="0" ignored="0">
+  <testsuite name="de.tuberlin.sese.swtpp.gameserver.test.ploy.TryMoveTest" time="0.021">
+    <testcase name="moveTest" classname="de.tuberlin.sese.swtpp.gameserver.test.ploy.TryMoveTest" time="0.015"/>
+    <testcase name="rotationTest" classname="de.tuberlin.sese.swtpp.gameserver.test.ploy.TryMoveTest" time="0.002"/>
+    <testcase name="finishedGameTest" classname="de.tuberlin.sese.swtpp.gameserver.test.ploy.TryMoveTest" time="0.003"/>
+    <testcase name="badMoveString" classname="de.tuberlin.sese.swtpp.gameserver.test.ploy.TryMoveTest" time="0.001"/>
+  </testsuite>
+</testrun>

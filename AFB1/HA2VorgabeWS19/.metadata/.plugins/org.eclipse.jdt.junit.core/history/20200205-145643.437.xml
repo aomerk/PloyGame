@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?><testrun name="TryMoveTest" project="HA2VorgabeWS19" tests="9" started="9" failures="0" errors="0" ignored="0">
+  <testsuite name="de.tuberlin.sese.swtpp.gameserver.test.ploy.TryMoveTest" time="0.04">
+    <testcase name="moveNotFigureTest" classname="de.tuberlin.sese.swtpp.gameserver.test.ploy.TryMoveTest" time="0.005"/>
+    <testcase name="onlyRotationTest" classname="de.tuberlin.sese.swtpp.gameserver.test.ploy.TryMoveTest" time="0.019"/>
+    <testcase name="moveTest" classname="de.tuberlin.sese.swtpp.gameserver.test.ploy.TryMoveTest" time="0.004"/>
+    <testcase name="moveNotOwnedTest" classname="de.tuberlin.sese.swtpp.gameserver.test.ploy.TryMoveTest" time="0.002"/>
+    <testcase name="notMovingTest" classname="de.tuberlin.sese.swtpp.gameserver.test.ploy.TryMoveTest" time="0.003"/>
+    <testcase name="rotationTest" classname="de.tuberlin.sese.swtpp.gameserver.test.ploy.TryMoveTest" time="0.002"/>
+    <testcase name="obligedMoveTest" classname="de.tuberlin.sese.swtpp.gameserver.test.ploy.TryMoveTest" time="0.001"/>
+    <testcase name="finishedGameTest" classname="de.tuberlin.sese.swtpp.gameserver.test.ploy.TryMoveTest" time="0.002"/>
+    <testcase name="badMoveString" classname="de.tuberlin.sese.swtpp.gameserver.test.ploy.TryMoveTest" time="0.001"/>
+  </testsuite>
+</testrun>

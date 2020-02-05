@@ -104,11 +104,16 @@ public abstract class Figure implements Serializable {
      * @param move parsed move information
      */
     void moveFigure(MoveUtil move) {
-        this.setPossibleMoves();
+        System.out.println("moving figure");
         move.aimPosition.setFigure(move.startPosition.getFigure());
         Board.positions.set(move.aimIndex, move.aimPosition); // aimIndex is aimPosition
-        move.startPosition.setFigure(); // set starting positions figure to null
+        if (move.aimIndex != move.startIndex) move.startPosition.setFigure(); // set starting positions figure to null
+
         Board.positions.set(move.startIndex, move.startPosition); // set starting index to start position
+
+        System.out.println("moved figure" + Board.positions.get(move.aimIndex).getFigure() );
+        this.setPossibleMoves();
+
     }
 
     /**
@@ -228,9 +233,12 @@ public abstract class Figure implements Serializable {
 	 * @param rotate how much to rotate
 	 */
 	void rotateFigure(int rotate) {
+	    System.out.println("rotating" + this.directions);
         for (int i = 0; i < this.directions.size(); i++) {
             this.directions.set(i, (directions.get(i) + rotate) % 8);
         }
+        System.out.println("rotated" + this.directions);
+
     }
 
 

@@ -1,0 +1,15 @@
+//org.eclipse.ui.commands/state/org.eclipse.ui.navigator.resources.nested.changeProjectPresentation/org.eclipse.ui.commands.radioState=false
+//org.eclipse.ui.commands/state/org.eclipse.wst.xml.views.XPathView.processor.xpathprocessor/org.eclipse.ui.commands.radioState=xpath10
+CONTENT_ASSIST_BACKGROUND_COLOR=224,224,224
+CONTENT_ASSIST_FOREGROUND_COLOR=15,15,15
+PLUGINS_NOT_ACTIVATED_ON_STARTUP=;org.eclipse.m2e.discovery;
+content_assist_parameters_background=224,224,224
+content_assist_parameters_foreground=15,15,15
+content_assist_proposals_background=224,224,224
+content_assist_proposals_foreground=15,15,15
+eclipse.preferences.version=1
+org.eclipse.egit.ui.DiffAddBackgroundColor=219,255,148
+org.eclipse.egit.ui.DiffHeadlineBackgroundColor=245,245,245
+org.eclipse.egit.ui.DiffHunkBackgroundColor=245,245,245
+org.eclipse.egit.ui.DiffRemoveBackgroundColor=255,172,172
+overriddenByCSS=,CONTENT_ASSIST_BACKGROUND_COLOR,CONTENT_ASSIST_FOREGROUND_COLOR,content_assist_parameters_background,content_assist_parameters_foreground,content_assist_proposals_background,content_assist_proposals_foreground,org.eclipse.egit.ui.DiffAddBackgroundColor,org.eclipse.egit.ui.DiffHeadlineBackgroundColor,org.eclipse.egit.ui.DiffHunkBackgroundColor,org.eclipse.egit.ui.DiffRemoveBackgroundColor,

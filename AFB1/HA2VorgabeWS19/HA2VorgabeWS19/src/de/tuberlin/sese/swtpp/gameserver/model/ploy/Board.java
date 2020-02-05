@@ -62,8 +62,8 @@ public class Board implements Serializable {
         if ((move.startIndex == move.aimIndex) && move.rotation != 0) return true; // you gotta do something, right?
         System.out.println(returns);
 
-        if (!checkObligedMovesSatisfied(isWhitePlayer, move)) returns = false; // there is another move you must make
-        System.out.println(returns);
+        if (!checkObligedMovesSatisfied(isWhitePlayer, move)) return false; // there is another move you must make
+        System.out.println("checkmove" + returns);
 
         returns = figure.getPossibleMoves().contains(move.aimIndex); // is move a valid rule
         System.out.println(returns);
@@ -76,14 +76,24 @@ public class Board implements Serializable {
      * @return does it satisfy obligations
      */
     boolean checkObligedMovesSatisfied(boolean whitePlays, MoveUtil move) {
+
         for (Map.Entry<Figure, List<Integer>> entry : Figure.possiblePositionMap.entrySet()) {
             // if opponent can reach your commander and it is your turn, you must escape
-            int index = (whitePlays) ? Figure.whiteCommanderIndex : Figure.blackCommanderIndex;
+//            System.out.println(entry);
+//            System.out.println(move.startIndex);
+//            System.out.println(whitePlays);
+
             boolean figureIsWhite = entry.getKey().isWhite();
             boolean keyOwner = (whitePlays) == figureIsWhite;
-            if (whitePlays && keyOwner && entry.getValue().contains(index) && move.startIndex != index)
+            if (keyOwner) continue;
+
+            int commanderPosition = (whitePlays) ? Figure.whiteCommanderIndex : Figure.blackCommanderIndex;
+            if (entry.getValue().contains(commanderPosition) && move.startIndex != commanderPosition) {
+                System.out.println(commanderPosition);
                 return false;
+            }
         }
+        System.out.println("player : " + whitePlays + " from " + move.startIndex + "ok");
         return true;
     }
 

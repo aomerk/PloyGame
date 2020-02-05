@@ -260,6 +260,7 @@ public class PloyGame extends Game implements Serializable {
 			return false; // move not possible
 
 		}
+		setNextPlayer((blackPlayer.equals(player) ? whitePlayer : blackPlayer));
 
 		// make Move
 		if (board.makeMove(moveString)) {
@@ -267,7 +268,6 @@ public class PloyGame extends Game implements Serializable {
 			player.setWinner();
 		}
 
-		setNextPlayer((blackPlayer.equals(player) ? whitePlayer : blackPlayer));
 
 		// TODO: update history
 
