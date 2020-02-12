@@ -6,19 +6,19 @@ import de.tuberlin.sese.swtpp.gameserver.model.ploy.Board.MoveUtil;
 
 public class Shield extends Figure  {
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 4808637449758055428L;
+     *
+     */
+    private static final long serialVersionUID = 4808637449758055428L;
 
     /**
      * list of possible moves
      */
-	List<Integer> possibleMoves;
+    List<Integer> possibleMoves;
 
     /**
      * index on board
      */
-	int positionIndex;
+    int positionIndex;
 
     /**
      *  constructor
@@ -54,18 +54,18 @@ public class Shield extends Figure  {
     void setPosition(int position) {
         this.positionIndex = position;
     }
-    
-	@Override
-	int getPositionIndex() {
-		return this.positionIndex;
-	}
+
+    @Override
+    int getPositionIndex() {
+        return this.positionIndex;
+    }
 
 
 
-	@Override
-	void move(MoveUtil move) {
-			moveFigure(move);
-			rotateFigure(move.rotation);		
-	}
-	
+    @Override
+    void move(MoveUtil move) {
+        moveFigure(move);
+        rotateFigure(move.rotation);
+    }
+
 }

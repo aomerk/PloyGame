@@ -52,50 +52,49 @@ public class Board implements Serializable {
      * @return if move is possible
      */
     boolean checkMove(String moveString, boolean isWhitePlayer) {
-        boolean returns = true;
+        boolean returns;
         if (!moveString.matches(regex)) return false; // is a valid move
         MoveUtil move = moveParser(moveString);
         Figure figure = positions.get(move.startIndex).getFigure();
 
         if (figure == null) return false;
-        if (figure.isWhite() != isWhitePlayer) returns = false; // does figure belong to player?
+        if (figure.isWhite() != isWhitePlayer) return false; // does figure belong to player?
         if ((move.startIndex == move.aimIndex) && move.rotation != 0) return true; // you gotta do something, right?
-        System.out.println(returns);
+//        System.out.println(returns);
 
-        if (!checkObligedMovesSatisfied(isWhitePlayer, move)) return false; // there is another move you must make
-        System.out.println("checkmove" + returns);
-
+//        if (!checkObligedMovesSatisfied(isWhitePlayer, move)) return false; // there is another move you must make
         returns = figure.getPossibleMoves().contains(move.aimIndex); // is move a valid rule
-        System.out.println(returns);
+//        System.out.println(returns);
         return returns;
     }
 
-    /**
-     * @param whitePlays whose turn is it?
-     * @param move       to check it satisfies obligations
-     * @return does it satisfy obligations
-     */
-    boolean checkObligedMovesSatisfied(boolean whitePlays, MoveUtil move) {
-
-        for (Map.Entry<Figure, List<Integer>> entry : Figure.possiblePositionMap.entrySet()) {
-            // if opponent can reach your commander and it is your turn, you must escape
-//            System.out.println(entry);
-//            System.out.println(move.startIndex);
-//            System.out.println(whitePlays);
-
-            boolean figureIsWhite = entry.getKey().isWhite();
-            boolean keyOwner = (whitePlays) == figureIsWhite;
-            if (keyOwner) continue;
-
-            int commanderPosition = (whitePlays) ? Figure.whiteCommanderIndex : Figure.blackCommanderIndex;
-            if (entry.getValue().contains(commanderPosition) && move.startIndex != commanderPosition) {
-                System.out.println(commanderPosition);
-                return false;
-            }
-        }
-        System.out.println("player : " + whitePlays + " from " + move.startIndex + "ok");
-        return true;
-    }
+//    /**
+//     * @param whitePlays whose turn is it?
+//     * @param move       to check it satisfies obligations
+//     * @return does it satisfy obligations
+//     */
+//    boolean checkObligedMovesSatisfied(boolean whitePlays, MoveUtil move) {
+//
+//        for (Map.Entry<Figure, List<Integer>> entry : Figure.possiblePositionMap.entrySet()) {
+//            // if opponent can reach your commander and it is your turn, you must escape
+////            System.out.println(entry);
+////            System.out.println(move.startIndex);
+////            System.out.println(whitePlays);
+//
+//            boolean figureIsWhite = entry.getKey().isWhite();
+//            boolean keyOwner = (whitePlays) == figureIsWhite;
+//            if (keyOwner) continue;
+//
+//            int commanderPosition = (whitePlays) ? Figure.whiteCommanderIndex : Figure.blackCommanderIndex;
+//            if (entry.getValue().contains(commanderPosition) && move.startIndex != commanderPosition) {
+//                System.out.println("aaaaa" + entry);
+//
+//                return false;
+//            }
+//        }
+//        System.out.println("player : " + whitePlays + " from " + move.startIndex + "ok");
+//        return true;
+//    }
 
     /**
      *
@@ -137,23 +136,21 @@ public class Board implements Serializable {
         MoveUtil move = moveParser(moveString);
         Figure figure = move.startPosition.getFigure();
 
-        if (positions.get(move.aimIndex).getFigure() instanceof Commander) {
-
+        if (positions.get(move.aimIndex).getFigure() instanceof Commander && move.aimIndex != move.startIndex) {
             figure.move(move);
             updateState(this.toString());
-
             return true;
         }
-
+        figure.move(move);
+        updateState(this.toString());
 
 //		System.out.println("want to move " + figure + " to " + move.aimIndex + "  " + figure.getPossibleMoves());
         /*
          * Shield can first move then rotate
          */
-        figure.move(move);
-        updateState(this.toString());
-//		System.out.println("possible moves of figures " + Figure.possiblePositionMap.size());
-        return false;
+
+        return Figure.possiblePositionMap.keySet().stream().filter(Figure::isWhite).count() == 1
+                || Figure.possiblePositionMap.keySet().stream().filter(e -> !e.isWhite()).count() == 1 ;
     }
 
     /**

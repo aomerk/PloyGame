@@ -26,6 +26,7 @@ public abstract class Figure implements Serializable {
      */
     private static final long serialVersionUID = -8346938339558523780L;
 
+
     /**
      * Each figure has legal moves
      */
@@ -44,10 +45,10 @@ public abstract class Figure implements Serializable {
      */
     private final boolean isWhite;
 
-	/**
-	 * directions, converted from binary string
-	 */
-	private final List<Integer> directions;
+    /**
+     * directions, converted from binary string
+     */
+    private final List<Integer> directions;
 
 
 
@@ -85,17 +86,18 @@ public abstract class Figure implements Serializable {
     abstract void setPossibleMoves();
 
 
-	/**
-	 * public constructor
-	 * @param isWhite figure owner
-	 * @param directions figure directions
-	 * @param positionIndex figure position
-	 */
-	public Figure(boolean isWhite, List<Integer> directions, int positionIndex) {
-		this.isWhite = isWhite;
-		this.directions = directions;
-		this.setPosition(positionIndex);
-	}
+    /**
+     * public constructor
+     *
+     * @param isWhite       figure owner
+     * @param directions    figure directions
+     * @param positionIndex figure position
+     */
+    public Figure(boolean isWhite, List<Integer> directions, int positionIndex) {
+        this.isWhite = isWhite;
+        this.directions = directions;
+        this.setPosition(positionIndex);
+    }
 
 
     /**
@@ -104,15 +106,15 @@ public abstract class Figure implements Serializable {
      * @param move parsed move information
      */
     void moveFigure(MoveUtil move) {
-        System.out.println("moving figure");
+//        System.out.println("moving figure");
         move.aimPosition.setFigure(move.startPosition.getFigure());
         Board.positions.set(move.aimIndex, move.aimPosition); // aimIndex is aimPosition
         if (move.aimIndex != move.startIndex) move.startPosition.setFigure(); // set starting positions figure to null
 
         Board.positions.set(move.startIndex, move.startPosition); // set starting index to start position
 
-        System.out.println("moved figure" + Board.positions.get(move.aimIndex).getFigure() );
-        this.setPossibleMoves();
+//        System.out.println("moved figure" + Board.positions.get(move.aimIndex).getFigure());
+//        this.setPossibleMoves();
 
     }
 
@@ -124,22 +126,24 @@ public abstract class Figure implements Serializable {
     }
 
 
-	/**
-	 *
-	 * @return list of integers, legal indexes it can go
-	 */
-	List<Integer> possibleUnitMoves() {
+    /**
+     * @return list of integers, legal indexes it can go
+     */
+    List<Integer> possibleUnitMoves() {
         List<Integer> possiblePositionIndices = new ArrayList<>();
         int index = this.getPositionIndex();
         for (Integer direction : this.getDirections()) {
             for (int distance = 1; distance <= this.getDirections().size(); distance++) {
                 int aimIndex = index + (distance * dirToDistance[direction]);
                 if (checkOutOfBounds(index, aimIndex, distance)) break;
-                Figure fig = Board.positions.get(aimIndex).getFigure();
-                if(fig != null){
-                    if(fig.isWhite() == isWhite)
-                        break;
+                Figure aimFig = Board.positions.get(aimIndex).getFigure();
+                if (aimFig != null && aimFig.isWhite() == this.isWhite)
+                    break;
+                if (aimFig != null && aimFig.isWhite() != this.isWhite ) {
+                    possiblePositionIndices.add(aimIndex);
+                    break;
                 }
+
                 possiblePositionIndices.add(aimIndex);
             }
         }
@@ -155,7 +159,8 @@ public abstract class Figure implements Serializable {
      * y-----
      * x,y has 1 index distance but illegal
      * but we not that you cant go more than your distance
-     * @param index row (9,8,7,6..)
+     *
+     * @param index    row (9,8,7,6..)
      * @param aimIndex column  (a,b,c,d,e,f..)
      * @param distance which way to move
      * @return if aim index is O.K
@@ -163,10 +168,8 @@ public abstract class Figure implements Serializable {
     boolean checkOutOfBounds(int index, int aimIndex, int distance) {
         int col = (index % 9) + 1, row = 9 - (index / 9);
         int aimCol = (aimIndex % 9) + 1, aimRow = 9 - (aimIndex / 9);
-        return (Math.abs(aimRow - row) > distance || Math.abs(aimCol - col ) > distance || aimIndex < 0 || aimIndex > 80);
+        return (Math.abs(aimRow - row) > distance || Math.abs(aimCol - col) > distance || aimIndex < 0 || aimIndex > 80);
     }
-
-
 
 
     /**
@@ -228,17 +231,24 @@ public abstract class Figure implements Serializable {
     }
 
 
-	/**
-	 * using modulus to not to become > 7
-	 * @param rotate how much to rotate
-	 */
-	void rotateFigure(int rotate) {
-	    System.out.println("rotating" + this.directions);
+    /**
+     * using modulus to not to become > 7
+     *
+     * @param rotate how much to rotate
+     */
+    void rotateFigure(int rotate) {
+//        System.out.println("rotating" + this.directions);
         for (int i = 0; i < this.directions.size(); i++) {
             this.directions.set(i, (directions.get(i) + rotate) % 8);
         }
-        System.out.println("rotated" + this.directions);
+//        System.out.println("rotated" + this.directions);
+    }
 
+    void normalMove(MoveUtil move) {
+        if (move.rotation > 0) {
+            rotateFigure(move.rotation);
+        } else
+            moveFigure(move);
     }
 
 

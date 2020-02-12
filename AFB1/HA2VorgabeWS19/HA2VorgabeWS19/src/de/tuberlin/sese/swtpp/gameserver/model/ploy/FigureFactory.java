@@ -22,10 +22,8 @@ public class FigureFactory {
                 return new Probe(isWhite, directions, index);
             case 3:
                 return new Lance(isWhite, directions, index);
-            case 4:
-                return new Commander(isWhite, directions, index);
             default:
-                return null;
+                return new Commander(isWhite, directions, index);
         }
     }
 }

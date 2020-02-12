@@ -26,15 +26,22 @@ public class Commander extends Figure {
 	@Override
 	void setPossibleMoves() {
 		List<Integer> possiblePositionIndices = new ArrayList<>();
-		int index = this.positionIndex;
+		int index = this.getPositionIndex();
+		int distance = 1;
 		for (Integer direction : this.getDirections()) {
-			int aimIndex = index * dirToDistance[direction];
-			if (checkOutOfBounds(index, aimIndex, 1))
-				break;
-			if (aimIndex < 0 || aimIndex > 80)
-				break;
-			if (Board.positions.get(aimIndex).getFigure() != null)
-				break;
+			int aimIndex = index + (distance * dirToDistance[direction]);
+			if (checkOutOfBounds(index, aimIndex, distance)) break;
+			Figure aimFig = Board.positions.get(aimIndex).getFigure();
+			if (aimFig != null) {
+				if (aimFig.isWhite() == this.isWhite())
+					break;
+				else {
+					possiblePositionIndices.add(aimIndex);
+//                    break;
+
+				}
+			}
+			possiblePositionIndices.add(aimIndex);
 
 		}
 		this.possibleMoves = possiblePositionIndices;
@@ -61,7 +68,7 @@ public class Commander extends Figure {
 	}
 
 	@Override
-	int getPositionIndex() {
+	public int getPositionIndex() {
 		// TODO Auto-generated method stub
 		return this.positionIndex;
 	}
